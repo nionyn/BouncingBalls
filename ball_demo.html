@@ -1,20 +1,19 @@
 <html>
 <body>
-<canvas id="canvas" width="640" height="480" style="border:1px solid #FFFFFF;"></canvas>
+<style type="text/css">
+  body { margin:0; }
+</style>
+<canvas id="canvas"></canvas>
 <script>
-const canvas = document.getElementById('canvas');
-const context = canvas.getContext('2d');
-const fps = 60;
-
 function Ball(radius)  {
   this.radius = radius;
   
   this.vector = { x : (Math.random() * (canvas.width - this.radius) + this.radius), 
                   y : (Math.random() * (canvas.height - this.radius) + this.radius) };
                   
-  this.velocity = { x : Math.random() < 0.5 ? Math.random() : -Math.random(),
-                    y : Math.random() < 0.5 ? Math.random() : -Math.random() };
-  
+  this.velocity = { x : Math.random() < 0.5 ? Math.random() * 2 : -Math.random() * 2,
+                    y : Math.random() < 0.5 ? Math.random() * 2 : -Math.random() * 2 };
+   
   this.draw = () => {
     context.fillStyle = "white";
     context.beginPath();
@@ -101,8 +100,15 @@ function animate() {
       requestAnimationFrame(animate);
     }, 1000 / fps);
 }
+
+const canvas = document.getElementById('canvas');
+const context = canvas.getContext('2d');
+const fps = 60;
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
  
-grid.seed(50);
+grid.seed(25);
 animate();
 </script>
 </body>
