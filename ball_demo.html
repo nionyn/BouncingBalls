@@ -1,0 +1,109 @@
+<html>
+<body>
+<canvas id="canvas" width="640" height="480" style="border:1px solid #FFFFFF;"></canvas>
+<script>
+const canvas = document.getElementById('canvas');
+const context = canvas.getContext('2d');
+const fps = 60;
+
+function Ball(radius)  {
+  this.radius = radius;
+  
+  this.vector = { x : (Math.random() * (canvas.width - this.radius) + this.radius), 
+                  y : (Math.random() * (canvas.height - this.radius) + this.radius) };
+                  
+  this.velocity = { x : Math.random() < 0.5 ? Math.random() : -Math.random(),
+                    y : Math.random() < 0.5 ? Math.random() : -Math.random() };
+  
+  this.draw = () => {
+    context.fillStyle = "white";
+    context.beginPath();
+    context.arc(this.vector.x, this.vector.y, this.radius, 0, 2  * Math.PI);
+    context.fill(); 
+  };
+  
+  this.move = function(){
+    this.vector.x += this.velocity.x;
+    this.vector.y += this.velocity.y;
+    //if ball collides with right side invert velocity along x axis
+    if (this.vector.x + this.radius > canvas.width) {
+      this.vector.x = canvas.width - this.radius;
+      this.velocity.x = this.velocity.x * -1;
+    }
+    //if ball collides with left side invert velocity along x axis
+    if (this.vector.x - this.radius < 0){
+      this.vector.x = 0 + this.radius;
+      this.velocity.x = this.velocity.x * -1;
+    }      
+    //if ball collides with bottom side invert velocity along y axis
+    if (this.vector.y + this.radius > canvas.height){
+      this.vector.y = canvas.height - this.radius;
+      this.velocity.y = this.velocity.y * -1;
+    }
+    //if ball collides with top side invert velocity along y axis
+    if (this.vector.y - this.radius < 0) {
+      this.vector.y = 0 + this.radius;
+      this.velocity.y = this.velocity.y * -1;
+    }
+  };
+  //if the centre of a ball + radius is inside another ball there is a collision
+  this.checkCollision = function(colliding_with){
+    let disX = (this.vector.x - colliding_with.vector.x);
+    let disY = (this.vector.y - colliding_with.vector.y);
+    let distance = Math.sqrt(disX * disX + disY * disY);
+    return (distance < this.radius + colliding_with.radius) ? true : false;
+  };
+  //code to move balls that are stuck together
+  this.moveApart = function(colliding_with){
+    midX = (this.vector.x + colliding_with.vector.x) / 2; 
+    midY = (this.vector.y + colliding_with.vector.y) / 2; 
+    if (this.vector.x < midX ) this.vector.x -= 1;
+    if (this.vector.y > midY ) this.vector.y += 1;
+    if (colliding_with.vector.x < midX ) colliding_with.vector.x -= 1;
+    if (colliding_with.vector.y > midY ) colliding_with.vector.y += 1;
+  };
+  
+}
+
+const grid = {
+  balls : [],  
+  seed : function(numberBalls){
+    for (i=1;i<numberBalls;i++)
+      this.balls.push(new Ball(20));
+  }, 
+  calculateAndDraw : function(){
+    //find each possible pair of balls
+    for (let p=0; p<this.balls.length - 1; p++){
+      let ball1 = this.balls[p];
+      for (let q = p + 1; q<this.balls.length; q++){
+        let ball2 = this.balls[q];
+        if (true){
+          if (ball1.checkCollision(ball2)) {
+            ball1.moveApart(ball2);
+            [ball1.velocity, ball2.velocity] = [ball2.velocity, ball1.velocity]
+          }
+        }
+      }
+    }
+    for (p of this.balls){
+      p.move();
+      p.draw();
+    }
+  }
+ 
+};
+
+function animate() {
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    grid.calculateAndDraw();
+    setTimeout(() => {
+      requestAnimationFrame(animate);
+    }, 1000 / fps);
+}
+ 
+grid.seed(50);
+animate();
+</script>
+</body>
+</html>
